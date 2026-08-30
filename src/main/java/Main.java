@@ -1,22 +1,30 @@
 import java.util.*;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
+        Terminal terminal = TerminalBuilder.builder().system(true).build();
 
-        // Ask for sort order
-        System.out.println("Ascending [true] or Descending [false]?");
-        boolean ascending = sc.nextBoolean();
+        // Ask for sort order (arrow-key menu)
+        int orderChoice = Navigator.promptMenu(
+                terminal,
+                "Ascending or Descending?",
+                List.of("Ascending", "Descending"));
+        boolean ascending = (orderChoice == 1);
 
-        // Ask for type
-        System.out.println("Numbers [1] or Strings [2]?");
-        int type = sc.nextInt();
+        // Ask for type (arrow-key menu)
+        int typeChoice = Navigator.promptMenu(
+                terminal,
+                "Numbers or Strings?",
+                List.of("Numbers", "Strings"));
 
-        // Ask for number of values
+        // Ask for number of values (still free-text, so Scanner stays)
         System.out.println("Enter number of values to sort:");
         int num = sc.nextInt();
 
-        if (type == 1) {
+        if (typeChoice == 1) {
             // Integer input
             Integer[] arr = new Integer[num];
             System.out.println("Enter " + num + " integers:");
@@ -40,5 +48,6 @@ public class Main {
         }
 
         sc.close();
+        terminal.close();
     }
 }
