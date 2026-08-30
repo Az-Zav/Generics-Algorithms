@@ -25,7 +25,7 @@ public class MergeSort{
         int i = 0, j = 0, k = left; // k tracks the lowest element index of sub-array
 
         while (i < leftArr.length && j < rightArr.length) { //replace position of lowest element with lowest value while left and right arrays still have values to compare
-            int value = leftArr[i].compareTo(rightArr[j]);
+            int value = leftArr[i].compareTo(rightArr[j]); //if smaller, returns negative value
             boolean takeLeft = ascending ? (value<=0) : (value>=0); //determines if sorting order is ascending or descending
             
             if (takeLeft) {
