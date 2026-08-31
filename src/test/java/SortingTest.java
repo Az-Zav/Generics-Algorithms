@@ -47,14 +47,14 @@ public class SortingTest {
     @Test
     void mergeSort_ascending_integers() {
         Integer[] arr = {5, 2, 8, 1, 9};
-        MergeSort.mergeSort(arr, 0, arr.length - 1, true);
+        MergeSort.mergeSort(arr, true, 0);
         assertArrayEquals(new Integer[]{1, 2, 5, 8, 9}, arr);
     }
 
     @Test
     void mergeSort_descending_integers() {
         Integer[] arr = {5, 2, 8, 1, 9};
-        MergeSort.mergeSort(arr, 0, arr.length - 1, false);
+        MergeSort.mergeSort(arr, false, 0);
         assertArrayEquals(new Integer[]{9, 8, 5, 2, 1}, arr);
     }
 
@@ -77,7 +77,7 @@ public class SortingTest {
     @Test
     void handles_duplicate_values() {
         Integer[] arr = {3, 1, 3, 2, 3};
-        MergeSort.mergeSort(arr, 0, arr.length - 1, true);
+        MergeSort.mergeSort(arr, true, 0);
         assertArrayEquals(new Integer[]{1, 2, 3, 3, 3}, arr);
     }
 }

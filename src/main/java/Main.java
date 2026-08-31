@@ -3,6 +3,8 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
 public class Main {
+    private static final int DELAY_MS = 3000; // pace of the animation, single source of truth
+
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         Terminal terminal = TerminalBuilder.builder().system(true).build();
@@ -61,7 +63,7 @@ public class Main {
         switch (algoChoice) {
             case 1 -> SelectionSort.selectionSort(arr, ascending);
             case 2 -> InsertionSort.insertionSort(arr, ascending);
-            case 3 -> MergeSort.mergeSort(arr, 0, arr.length - 1, ascending);
+            case 3 -> MergeSort.mergeSort(arr, ascending, DELAY_MS);
             case 4 -> QuickSort.quickSort(arr, 0, arr.length - 1, ascending);
             default -> throw new IllegalArgumentException("Unknown algorithm choice: " + algoChoice);
         }
