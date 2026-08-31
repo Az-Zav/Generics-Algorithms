@@ -1,31 +1,152 @@
+/**
+ * QuickSort
+ * quickSort() chooses a pivot, partitions the array around the pivot,
+ * and recursively sorts the left and right partitions.
+ */
 public class QuickSort {
-    
-    public static <T extends Comparable<T>> void quickSort(T[] arr, int low, int high, boolean ascending){ //low and high are element indices
-        if (low < high) { //stopping condition for recursion if partition has 0 or 1 element
-            int pivotIndex = partition(arr, low, high, ascending);
-            quickSort(arr, low, pivotIndex - 1, ascending); //recurse on left partition
-            quickSort(arr, pivotIndex + 1, high, ascending); //recurse on right partition
-        }
+
+    public static <T extends Comparable<T>> void quickSort(T[] arr, boolean ascending, int delayMs) {
+        boolean[] sortedMask = new boolean[arr.length];
+        boolean[] gapMask = new boolean[arr.length];
+        quickSort(arr, 0, arr.length - 1, ascending, delayMs, sortedMask, gapMask);
     }
 
-    private static <T extends Comparable<T>> int partition(T[] arr, int low, int high, boolean ascending) {
+    public static <T extends Comparable<T>> void quickSort(T[] arr, int low, int high, boolean ascending) {
+        boolean[] sortedMask = new boolean[arr.length];
+        boolean[] gapMask = new boolean[arr.length];
+        quickSort(arr, low, high, ascending, 0, sortedMask, gapMask);
+    }
+
+    private static <T extends Comparable<T>> void quickSort(T[] arr, int low, int high, boolean ascending, int delayMs, boolean[] sortedMask, boolean[] gapMask) {
+        if (low >= high) {
+            if (low == high) {
+                sortedMask[low] = true; // single-element partition is trivially sorted
+                if (delayMs > 0) {
+                    renderSingleElementSorted(arr, low, sortedMask, gapMask, delayMs);
+                }
+            }
+            return;
+        }
+
+        renderPartitionStart(arr, low, high, sortedMask, gapMask, delayMs);
+        int pivotIndex = partition(arr, low, high, ascending, delayMs, sortedMask, gapMask);
+        sortedMask[pivotIndex] = true; // pivot is placed in its final sorted position
+        renderPivotPlaced(arr, low, high, pivotIndex, sortedMask, gapMask, delayMs);
+
+        // recurse on left and right partitions
+        quickSort(arr, low, pivotIndex - 1, ascending, delayMs, sortedMask, gapMask);
+        quickSort(arr, pivotIndex + 1, high, ascending, delayMs, sortedMask, gapMask);
+    }
+
+    private static <T extends Comparable<T>> int partition(T[] arr, int low, int high, boolean ascending, int delayMs, boolean[] sortedMask, boolean[] gapMask) {
         T pivot = arr[high]; // choose last element as pivot
-        int i = low - 1; //tracks the index of smaller partition boundary; -1 indicates empty
+        renderPivotChosen(arr, low, high, high, sortedMask, gapMask, delayMs);
+
+        int i = low - 1; // tracks partition boundary of elements placed on the left
+
         for (int j = low; j < high; j++) {
-            int value = arr[j].compareTo(pivot); //if smaller, returns negative value
-            boolean belongsLeft = ascending ? (value <= 0) : (value >= 0); //determines if sorting order is ascending or descending
+            renderCompare(arr, low, high, j, high, sortedMask, gapMask, delayMs);
+
+            int value = arr[j].compareTo(pivot);
+            boolean belongsLeft = ascending ? (value <= 0) : (value >= 0);
+
             if (belongsLeft) {
-                i++; // increase slot for smaller partition value once found
-                swap(arr, i, j); //swap found smaller element with current partition boundary slot
+                i++;
+                if (i != j) {
+                    swap(arr, i, j);
+                    renderSwap(arr, low, high, i, j, high, sortedMask, gapMask, delayMs);
+                }
             }
         }
-        swap(arr, i + 1, high); // swap pivot(last element) with slot right of partition boundary; place pivot value at the right slot
-        return i + 1; //return index of pivot element's new slot
+
+        // Place pivot in its correct position
+        int finalPivotPos = i + 1;
+        if (finalPivotPos != high) {
+            swap(arr, finalPivotPos, high);
+            renderSwap(arr, low, high, finalPivotPos, high, finalPivotPos, sortedMask, gapMask, delayMs);
+        }
+
+        return finalPivotPos;
     }
 
     private static <T extends Comparable<T>> void swap(T[] arr, int a, int b) {
-        T temp  = arr[a];
+        T temp = arr[a];
         arr[a] = arr[b];
         arr[b] = temp;
+    }
+
+    // ---- render wrappers: build a BoxSpec[] for this moment, then hand it to the dumb box drawer ----
+
+    /**
+     * Base spec builder shared by all of QuickSort's render moments: marks everything
+     * outside [left,right] as inactive, marks sorted positions green, and opens visual
+     * gaps at the partition boundaries so the active range reads as its own separated block.
+     */
+    private static <T> AnimationUtil.BoxSpec[] baseSpecs(T[] arr, int left, int right, boolean[] sortedMask, boolean[] gapMask) {
+        AnimationUtil.BoxSpec[] specs = AnimationUtil.freshSpecs(arr);
+        for (int k = 0; k < arr.length; k++) {
+            if (k < left || k > right) {
+                specs[k].state = AnimationUtil.CellState.OUT_OF_RANGE;
+            } else if (sortedMask[k]) {
+                specs[k].state = AnimationUtil.CellState.SORTED;
+            }
+            boolean boundaryGap = (k == left - 1) || (k == right);
+            specs[k].gapAfter = boundaryGap || gapMask[k];
+        }
+        return specs;
+    }
+
+    private static <T> void renderPartitionStart(T[] arr, int low, int high, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        if (delayMs <= 0) return;
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        String message = "Partitioning range [" + low + ".." + high + "]";
+        AnimationUtil.render(arr, specs, message, delayMs);
+    }
+
+    private static <T> void renderPivotChosen(T[] arr, int low, int high, int pivotIdx, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        if (delayMs <= 0) return;
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        specs[pivotIdx].state = AnimationUtil.CellState.PIVOT;
+        specs[pivotIdx].lift = true;
+        String message = "Selected pivot: " + arr[pivotIdx] + " at index " + pivotIdx;
+        AnimationUtil.render(arr, specs, message, delayMs);
+    }
+
+    private static <T> void renderCompare(T[] arr, int low, int high, int currentIdx, int pivotIdx, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        if (delayMs <= 0) return;
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        specs[pivotIdx].state = AnimationUtil.CellState.PIVOT;
+        specs[currentIdx].state = AnimationUtil.CellState.COMPARING;
+        specs[currentIdx].lift = true;
+        String message = "Comparing " + arr[currentIdx] + " (index " + currentIdx + ") with pivot " + arr[pivotIdx];
+        AnimationUtil.render(arr, specs, message, delayMs);
+    }
+
+    private static <T> void renderSwap(T[] arr, int low, int high, int idx1, int idx2, int pivotIdx, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        if (delayMs <= 0) return;
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        specs[idx1].state = AnimationUtil.CellState.SWAPPING;
+        specs[idx1].lift = true;
+        specs[idx2].state = AnimationUtil.CellState.SWAPPING;
+        specs[idx2].lift = true;
+        String message = "Swapped " + arr[idx1] + " (index " + idx1 + ") and " + arr[idx2] + " (index " + idx2 + ")";
+        AnimationUtil.render(arr, specs, message, delayMs);
+    }
+
+    private static <T> void renderPivotPlaced(T[] arr, int low, int high, int pivotIdx, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        if (delayMs <= 0) return;
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        specs[pivotIdx].state = AnimationUtil.CellState.SORTED;
+        specs[pivotIdx].lift = true;
+        String message = "Pivot " + arr[pivotIdx] + " locked in sorted position at index " + pivotIdx;
+        AnimationUtil.render(arr, specs, message, delayMs);
+    }
+
+    private static <T> void renderSingleElementSorted(T[] arr, int index, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        if (delayMs <= 0) return;
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, index, index, sortedMask, gapMask);
+        specs[index].state = AnimationUtil.CellState.SORTED;
+        String message = "Single element [" + index + "] is sorted";
+        AnimationUtil.render(arr, specs, message, delayMs);
     }
 }

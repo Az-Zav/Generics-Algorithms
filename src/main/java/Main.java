@@ -64,7 +64,7 @@ public class Main {
             case 1 -> SelectionSort.selectionSort(arr, ascending);
             case 2 -> InsertionSort.insertionSort(arr, ascending);
             case 3 -> MergeSort.mergeSort(arr, ascending, DELAY_MS);
-            case 4 -> QuickSort.quickSort(arr, 0, arr.length - 1, ascending);
+            case 4 -> QuickSort.quickSort(arr, ascending, DELAY_MS);
             default -> throw new IllegalArgumentException("Unknown algorithm choice: " + algoChoice);
         }
     }
