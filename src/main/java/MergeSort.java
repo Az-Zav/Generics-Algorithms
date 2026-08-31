@@ -11,30 +11,32 @@ public class MergeSort{
 
     public static <T extends Comparable<T>> void mergeSort(T[] arr, boolean ascending, int delayMs) {
         boolean[] sortedMask = new boolean[arr.length];
-        mergeSort(arr, 0, arr.length - 1, ascending, delayMs, sortedMask);
+        boolean[] gapMask = new boolean[arr.length]; // persistent, mirrors sortedMask: gapMask[k]==true means "draw a gap after index k",
+                                                       // set by renderSplit and cleared by renderJoin, visible through every level of recursion
+        mergeSort(arr, 0, arr.length - 1, ascending, delayMs, sortedMask, gapMask);
     }
 
-    private static <T extends Comparable<T>> void mergeSort(T[] arr, int left, int right, boolean ascending, int delayMs, boolean[] sortedMask) {
+    private static <T extends Comparable<T>> void mergeSort(T[] arr, int left, int right, boolean ascending, int delayMs, boolean[] sortedMask, boolean[] gapMask) {
         if (left >= right) {
             if (left == right) sortedMask[left] = true; // single-element base case is trivially sorted
             return;
         }
 
         int mid = (left + right)/2;
-        renderSplit(arr, left, mid, right, sortedMask, delayMs); // show this level's split before recursing
-        mergeSort(arr, left, mid, ascending, delayMs, sortedMask); //recurse left array from split
-        mergeSort(arr, mid + 1, right, ascending, delayMs, sortedMask); //recurse right array from split
-        merge(arr, left, mid, right, ascending, delayMs, sortedMask);
+        renderSplit(arr, left, mid, right, sortedMask, gapMask, delayMs); // opens this level's gap, then shows it, before recursing
+        mergeSort(arr, left, mid, ascending, delayMs, sortedMask, gapMask); //recurse left array from split
+        mergeSort(arr, mid + 1, right, ascending, delayMs, sortedMask, gapMask); //recurse right array from split
+        merge(arr, left, mid, right, ascending, delayMs, sortedMask, gapMask);
     }
 
-    private static <T extends Comparable<T>> void merge(T[] arr, int left, int mid, int right, boolean ascending, int delayMs, boolean[] sortedMask) {
+    private static <T extends Comparable<T>> void merge(T[] arr, int left, int mid, int right, boolean ascending, int delayMs, boolean[] sortedMask, boolean[] gapMask) {
         T[] leftArr = Arrays.copyOfRange(arr, left, mid + 1); //Third parameter is exclusive
         T[] rightArr = Arrays.copyOfRange(arr, mid + 1, right + 1); //Third parameter is exclusive
 
         int i = 0, j = 0, k = left; // k tracks the lowest element index of sub-array
 
         while (i < leftArr.length && j < rightArr.length) { //replace position of lowest element with lowest value while left and right arrays still have values to compare
-            renderCompare(arr, left, mid, right, i, j, leftArr[i], rightArr[j], sortedMask, delayMs); // comparing the two candidates
+            renderCompare(arr, left, right, i, j, mid, leftArr[i], rightArr[j], sortedMask, gapMask, delayMs); // comparing the two candidates
 
             int value = leftArr[i].compareTo(rightArr[j]); //if smaller, returns negative value
             boolean takeLeft = ascending ? (value<=0) : (value>=0); //determines if sorting order is ascending or descending
@@ -45,7 +47,7 @@ public class MergeSort{
                 arr[k] = rightArr[j++];
             }
             sortedMask[k] = true; // placed into merged position
-            renderPlace(arr, left, mid, right, k, sortedMask, delayMs); // show the overwrite
+            renderPlace(arr, left, right, k, sortedMask, gapMask, delayMs); // show the overwrite
             k++;
         }
 
@@ -53,17 +55,17 @@ public class MergeSort{
         while (i < leftArr.length) {
             arr[k] = leftArr[i++];
             sortedMask[k] = true;
-            renderPlace(arr, left, mid, right, k, sortedMask, delayMs);
+            renderPlace(arr, left, right, k, sortedMask, gapMask, delayMs);
             k++;
         }
         while (j < rightArr.length) {
             arr[k] = rightArr[j++];
             sortedMask[k] = true;
-            renderPlace(arr, left, mid, right, k, sortedMask, delayMs);
+            renderPlace(arr, left, right, k, sortedMask, gapMask, delayMs);
             k++;
         }
 
-        renderJoin(arr, left, right, sortedMask, delayMs); // this range is fully merged, heal the gap
+        renderJoin(arr, left, mid, right, sortedMask, gapMask, delayMs); // this range is fully merged, heal the gap this level opened
     }
 
     // ---- render wrappers: build a BoxSpec[] for this moment, then hand it to the dumb box drawer ----
@@ -71,14 +73,17 @@ public class MergeSort{
     /**
      * Base spec builder shared by all of MergeSort's render moments: marks everything
      * outside [left,right] as inactive, marks sorted positions green, and opens visual
-     * gaps so the active range reads as its own separated block:
-     *   - at left-1, so the active range doesn't blend into the dimmed boxes before it
-     *   - at right, so it doesn't blend into the dimmed boxes after it
-     *   - at gapIndex (the split point), so the two active halves read as separate
-     * gapIndex = -1 means no internal split gap (used once a range has been merged/joined) --
-     * the left/right boundary gaps still apply as long as this range isn't the whole array.
+     * gaps so the active range reads as its own separated block. Two independent sources
+     * of gaps are combined:
+     *   - boundaryGap: local to THIS call, framing the currently active window --
+     *     at left-1 (so it doesn't blend into the dimmed boxes before it) and at
+     *     right (so it doesn't blend into the dimmed boxes after it).
+     *   - gapMask: persistent across the whole recursion tree, like sortedMask.
+     *     Every split opened by renderSplit (at any level, ancestor or current)
+     *     stays visible until the matching renderJoin heals it, so a gap opened
+     *     three levels up is still drawn even while rendering a leaf-level compare.
      */
-    private static <T> AnimationUtil.BoxSpec[] baseSpecs(T[] arr, int left, int right, boolean[] sortedMask, int gapIndex) {
+    private static <T> AnimationUtil.BoxSpec[] baseSpecs(T[] arr, int left, int right, boolean[] sortedMask, boolean[] gapMask) {
         AnimationUtil.BoxSpec[] specs = AnimationUtil.freshSpecs(arr);
         for (int k = 0; k < arr.length; k++) {
             if (k < left || k > right) {
@@ -87,19 +92,20 @@ public class MergeSort{
                 specs[k].state = AnimationUtil.CellState.SORTED;
             }
             boolean boundaryGap = (k == left - 1) || (k == right);
-            specs[k].gapAfter = boundaryGap || (k == gapIndex);
+            specs[k].gapAfter = boundaryGap || gapMask[k];
         }
         return specs;
     }
 
-    private static <T> void renderSplit(T[] arr, int left, int mid, int right, boolean[] sortedMask, int delayMs) {
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, mid);
+    private static <T> void renderSplit(T[] arr, int left, int mid, int right, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        gapMask[mid] = true; // open this level's gap -- stays open through both halves' full recursion until this range's renderJoin heals it
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask);
         String message = "Splitting [" + left + ".." + right + "] into [" + left + ".." + mid + "] and [" + (mid + 1) + ".." + right + "]";
         AnimationUtil.render(arr, specs, message, delayMs);
     }
 
-    private static <T> void renderCompare(T[] arr, int left, int mid, int right, int i, int j, T leftVal, T rightVal, boolean[] sortedMask, int delayMs) {
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, mid); // keep the split visible until this range is joined
+    private static <T> void renderCompare(T[] arr, int left, int right, int i, int j, int mid, T leftVal, T rightVal, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask); // this level's gap (and every ancestor's) is already open in gapMask
         int leftIdx = left + i;
         int rightIdx = mid + 1 + j;
         specs[leftIdx].state = AnimationUtil.CellState.COMPARING;
@@ -110,16 +116,17 @@ public class MergeSort{
         AnimationUtil.render(arr, specs, message, delayMs);
     }
 
-    private static <T> void renderPlace(T[] arr, int left, int mid, int right, int k, boolean[] sortedMask, int delayMs) {
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, mid); // still split until join
+    private static <T> void renderPlace(T[] arr, int left, int right, int k, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask); // still split until this level's join
         specs[k].state = AnimationUtil.CellState.SWAPPING; // reuse "active write" red; message clarifies it's a placement, not a swap
         specs[k].lift = true;
         String message = "Placing " + arr[k] + " at index " + k;
         AnimationUtil.render(arr, specs, message, delayMs);
     }
 
-    private static <T> void renderJoin(T[] arr, int left, int right, boolean[] sortedMask, int delayMs) {
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, -1); // no gap: halves are healed back together
+    private static <T> void renderJoin(T[] arr, int left, int mid, int right, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
+        gapMask[mid] = false; // heal exactly the gap this level's renderSplit opened -- ancestor gaps, if any, remain open
+        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask);
         String message = "Merged [" + left + ".." + right + "]";
         AnimationUtil.render(arr, specs, message, delayMs);
     }
