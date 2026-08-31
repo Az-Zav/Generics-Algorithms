@@ -19,11 +19,11 @@ public class AnimationUtil {
      * @param sortedMask    which elements are sorted
      * @param delayMs       Number of miliseconds to delay frame rendering
      */
-    static void render(int[] arr, int a, int b, boolean isSwap, boolean[] sortedMask, int delayMs) {
+    public static <T> void render(T[] arr, int a, int b, boolean isSwap, boolean[] sortedMask, int delayMs) {
     clearScreen();
 
         int width = 1;
-        for (int v: arr) {
+        for (T v: arr) {
             width = Math.max(width, String.valueOf(v).length()); // tracks largest width across the array
         }
         width += 2; // adds left and right padding
