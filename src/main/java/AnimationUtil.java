@@ -20,7 +20,7 @@ public class AnimationUtil {
      * @param delayMs       Number of miliseconds to delay frame rendering
      */
     public static <T> void render(T[] arr, int a, int b, boolean isSwap, boolean[] sortedMask, int delayMs) {
-    clearScreen();
+        clearScreen();
 
         int width = 1;
         for (T v: arr) {

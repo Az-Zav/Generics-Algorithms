@@ -20,6 +20,12 @@ public class Main {
                 "Numbers or Strings?",
                 List.of("Numbers", "Strings"));
 
+        // Ask for sorting algorithm (arrow-key menu)
+        int algoChoice = Navigator.promptMenu(
+                terminal,
+                "Which sorting algorithm?",
+                List.of("Selection Sort", "Insertion Sort", "Merge Sort", "Quick Sort"));
+
         // Ask for number of values (still free-text, so Scanner stays)
         System.out.println("Enter number of values to sort:");
         int num = sc.nextInt();
@@ -32,7 +38,7 @@ public class Main {
                 arr[i] = sc.nextInt();
             }
 
-            SelectionSort.selectionSort(arr, ascending);
+            runSort(arr, algoChoice, ascending);
             System.out.println("Sorted result: " + Arrays.toString(arr));
 
         } else {
@@ -43,11 +49,21 @@ public class Main {
                 arr[i] = sc.next();
             }
 
-            SelectionSort.selectionSort(arr, ascending);
+            runSort(arr, algoChoice, ascending);
             System.out.println("Sorted result: " + Arrays.toString(arr));
         }
 
         sc.close();
         terminal.close();
+    }
+
+    private static <T extends Comparable<T>> void runSort(T[] arr, int algoChoice, boolean ascending) {
+        switch (algoChoice) {
+            case 1 -> SelectionSort.selectionSort(arr, ascending);
+            case 2 -> InsertionSort.insertionSort(arr, ascending);
+            case 3 -> MergeSort.mergeSort(arr, 0, arr.length - 1, ascending);
+            case 4 -> QuickSort.quickSort(arr, 0, arr.length - 1, ascending);
+            default -> throw new IllegalArgumentException("Unknown algorithm choice: " + algoChoice);
+        }
     }
 }
