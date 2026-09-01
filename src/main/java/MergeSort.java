@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class MergeSort{
 
     public static <T extends Comparable<T>> void mergeSort(T[] arr, boolean ascending, int delayMs) {
-        boolean[] sortedMask = new boolean[arr.length];
+        boolean[] sortedMask = new boolean[arr.length]; //persistent, checks state of each element of array: sortedMask[k]==true means "highlight in green"
         boolean[] gapMask = new boolean[arr.length]; // persistent, mirrors sortedMask: gapMask[k]==true means "draw a gap after index k",
                                                        // set by renderSplit and cleared by renderJoin, visible through every level of recursion
         mergeSort(arr, 0, arr.length - 1, ascending, delayMs, sortedMask, gapMask);
@@ -24,6 +24,11 @@ public class MergeSort{
 
         int mid = (left + right)/2;
         renderSplit(arr, left, mid, right, sortedMask, gapMask, delayMs); // opens this level's gap, then shows it, before recursing
+        
+        String leftPart = formatSlice(arr, left, mid);
+        String rightPart = formatSlice(arr, mid + 1, right);
+        AnimationUtil.StepLogger.log("Split: " + leftPart + " and " + rightPart);
+
         mergeSort(arr, left, mid, ascending, delayMs, sortedMask, gapMask); //recurse left array from split
         mergeSort(arr, mid + 1, right, ascending, delayMs, sortedMask, gapMask); //recurse right array from split
         merge(arr, left, mid, right, ascending, delayMs, sortedMask, gapMask);
@@ -66,9 +71,23 @@ public class MergeSort{
         }
 
         renderJoin(arr, left, mid, right, sortedMask, gapMask, delayMs); // this range is fully merged, heal the gap this level opened
+
+        String mergedPart = formatSlice(arr, left, right);
+        boolean isFinal = (left == 0 && right == arr.length - 1);
+        AnimationUtil.StepLogger.log((isFinal ? "Merge final: " : "Merge step: ") + mergedPart);
     }
 
-    // ---- render wrappers: build a BoxSpec[] for this moment, then hand it to the dumb box drawer ----
+    private static <T> String formatSlice(T[] arr, int from, int to) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = from; i <= to; i++) {
+            sb.append(arr[i]);
+            if (i < to) sb.append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    // ---- render wrappers: build a BoxSpec[] for this moment, then hand it to the box drawer ----
 
     /**
      * Base spec builder shared by all of MergeSort's render moments: marks everything

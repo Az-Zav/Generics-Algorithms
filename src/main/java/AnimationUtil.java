@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class AnimationUtil {
 
@@ -143,6 +146,7 @@ public class AnimationUtil {
         }
     }
 
+    // Helper for colors
     private static String colorFor(CellState state) {
         return switch (state) {
             case COMPARING    -> YELLOW;
@@ -154,6 +158,27 @@ public class AnimationUtil {
             case NORMAL       -> "";
         };
     }
+
+    // Helper for step logger
+    public static class StepLogger {
+        private static final List<String> logs = new ArrayList<>();
+
+        public static void log(String line) {
+            logs.add(line);
+        }
+
+        public static void printSummary() {
+            System.out.println("\n=== Algorithm Steps ===");
+            for (String line : logs) {
+                System.out.println(line);
+            }
+        }
+
+        public static void clear() {
+            logs.clear();
+        }
+    }
+
 
 
     //Helper method to clear screen
@@ -169,6 +194,8 @@ public class AnimationUtil {
             for (int i = 0; i < 50; i++) System.out.println();
         }
     }
+
+    
 
 }
  

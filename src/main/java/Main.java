@@ -3,7 +3,7 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
 public class Main {
-    private static final int DELAY_MS = 3000; // pace of the animation, single source of truth
+    private static final int DELAY_MS = 500; // pace of the animation, single source of truth
 
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
@@ -29,6 +29,7 @@ public class Main {
                 List.of("Selection Sort", "Insertion Sort", "Merge Sort", "Quick Sort"));
 
         // Ask for number of values (still free-text, so Scanner stays)
+        clearScreen();
         System.out.println("Enter number of values to sort:");
         int num = sc.nextInt();
 
@@ -40,8 +41,10 @@ public class Main {
                 arr[i] = sc.nextInt();
             }
 
+            AnimationUtil.StepLogger.clear();
             runSort(arr, algoChoice, ascending);
-            System.out.println("Sorted result: " + Arrays.toString(arr));
+            AnimationUtil.StepLogger.printSummary();
+            System.out.println("\033[32m" + "Sorted result: " + Arrays.toString(arr) + "\033[0m");
 
         } else {
             // String input
@@ -51,8 +54,10 @@ public class Main {
                 arr[i] = sc.next();
             }
 
+            AnimationUtil.StepLogger.clear();
             runSort(arr, algoChoice, ascending);
-            System.out.println("Sorted result: " + Arrays.toString(arr));
+            AnimationUtil.StepLogger.printSummary();
+            System.out.println("\033[32m" + "Sorted result: " + Arrays.toString(arr) + "\033[0m");
         }
 
         sc.close();
@@ -66,6 +71,20 @@ public class Main {
             case 3 -> MergeSort.mergeSort(arr, ascending, DELAY_MS);
             case 4 -> QuickSort.quickSort(arr, ascending, DELAY_MS);
             default -> throw new IllegalArgumentException("Unknown algorithm choice: " + algoChoice);
+        }
+    }
+
+    //Helper method to clear screen
+    private static void clearScreen() {
+        try {
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+            } else {
+                new ProcessBuilder("clear").inheritIO().start().waitFor();
+            }
+        } catch (Exception e) {
+            // fallback: print a bunch of blank lines
+            for (int i = 0; i < 50; i++) System.out.println();
         }
     }
 }
