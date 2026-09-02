@@ -41,9 +41,9 @@ public class Main {
                 arr[i] = sc.nextInt();
             }
 
-            AnimationUtil.StepLogger.clear();
+            Animator.StepLogger.clear();
             runSort(arr, algoChoice, ascending);
-            AnimationUtil.StepLogger.printSummary();
+            Animator.StepLogger.printSummary();
             System.out.println("\033[32m" + "Sorted result: " + Arrays.toString(arr) + "\033[0m");
 
         } else {
@@ -54,9 +54,9 @@ public class Main {
                 arr[i] = sc.next();
             }
 
-            AnimationUtil.StepLogger.clear();
+            Animator.StepLogger.clear();
             runSort(arr, algoChoice, ascending);
-            AnimationUtil.StepLogger.printSummary();
+            Animator.StepLogger.printSummary();
             System.out.println("\033[32m" + "Sorted result: " + Arrays.toString(arr) + "\033[0m");
         }
 

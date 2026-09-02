@@ -27,7 +27,7 @@ public class MergeSort{
         
         String leftPart = formatSlice(arr, left, mid);
         String rightPart = formatSlice(arr, mid + 1, right);
-        AnimationUtil.StepLogger.log("Split: " + leftPart + " and " + rightPart);
+        Animator.StepLogger.log("Split: " + leftPart + " and " + rightPart);
 
         mergeSort(arr, left, mid, ascending, delayMs, sortedMask, gapMask); //recurse left array from split
         mergeSort(arr, mid + 1, right, ascending, delayMs, sortedMask, gapMask); //recurse right array from split
@@ -74,7 +74,7 @@ public class MergeSort{
 
         String mergedPart = formatSlice(arr, left, right);
         boolean isFinal = (left == 0 && right == arr.length - 1);
-        AnimationUtil.StepLogger.log((isFinal ? "Merge final: " : "Merge step: ") + mergedPart);
+        Animator.StepLogger.log((isFinal ? "Merge final: " : "Merge step: ") + mergedPart);
     }
 
     private static <T> String formatSlice(T[] arr, int from, int to) {
@@ -102,13 +102,13 @@ public class MergeSort{
      *     stays visible until the matching renderJoin heals it, so a gap opened
      *     three levels up is still drawn even while rendering a leaf-level compare.
      */
-    private static <T> AnimationUtil.BoxSpec[] baseSpecs(T[] arr, int left, int right, boolean[] sortedMask, boolean[] gapMask) {
-        AnimationUtil.BoxSpec[] specs = AnimationUtil.freshSpecs(arr);
+    private static <T> Animator.BoxSpec[] baseSpecs(T[] arr, int left, int right, boolean[] sortedMask, boolean[] gapMask) {
+        Animator.BoxSpec[] specs = Animator.freshSpecs(arr);
         for (int k = 0; k < arr.length; k++) {
             if (k < left || k > right) {
-                specs[k].state = AnimationUtil.CellState.OUT_OF_RANGE;
+                specs[k].state = Animator.CellState.OUT_OF_RANGE;
             } else if (sortedMask[k]) {
-                specs[k].state = AnimationUtil.CellState.SORTED;
+                specs[k].state = Animator.CellState.SORTED;
             }
             boolean boundaryGap = (k == left - 1) || (k == right);
             specs[k].gapAfter = boundaryGap || gapMask[k];
@@ -118,35 +118,35 @@ public class MergeSort{
 
     private static <T> void renderSplit(T[] arr, int left, int mid, int right, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
         gapMask[mid] = true; // open this level's gap -- stays open through both halves' full recursion until this range's renderJoin heals it
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask);
+        Animator.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask);
         String message = "Splitting [" + left + ".." + right + "] into [" + left + ".." + mid + "] and [" + (mid + 1) + ".." + right + "]";
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 
     private static <T> void renderCompare(T[] arr, int left, int right, int i, int j, int mid, T leftVal, T rightVal, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask); // this level's gap (and every ancestor's) is already open in gapMask
+        Animator.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask); // this level's gap (and every ancestor's) is already open in gapMask
         int leftIdx = left + i;
         int rightIdx = mid + 1 + j;
-        specs[leftIdx].state = AnimationUtil.CellState.COMPARING;
+        specs[leftIdx].state = Animator.CellState.COMPARING;
         specs[leftIdx].lift = true;
-        specs[rightIdx].state = AnimationUtil.CellState.COMPARING;
+        specs[rightIdx].state = Animator.CellState.COMPARING;
         specs[rightIdx].lift = true;
         String message = "Comparing " + leftVal + " (left half) and " + rightVal + " (right half)";
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 
     private static <T> void renderPlace(T[] arr, int left, int right, int k, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask); // still split until this level's join
-        specs[k].state = AnimationUtil.CellState.SWAPPING; // reuse "active write" red; message clarifies it's a placement, not a swap
+        Animator.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask); // still split until this level's join
+        specs[k].state = Animator.CellState.SWAPPING; // reuse "active write" red; message clarifies it's a placement, not a swap
         specs[k].lift = true;
         String message = "Placing " + arr[k] + " at index " + k;
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 
     private static <T> void renderJoin(T[] arr, int left, int mid, int right, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
         gapMask[mid] = false; // heal exactly the gap this level's renderSplit opened -- ancestor gaps, if any, remain open
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask);
+        Animator.BoxSpec[] specs = baseSpecs(arr, left, right, sortedMask, gapMask);
         String message = "Merged [" + left + ".." + right + "]";
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 }

@@ -82,13 +82,13 @@ public class QuickSort {
      * outside [left,right] as inactive, marks sorted positions green, and opens visual
      * gaps at the partition boundaries so the active range reads as its own separated block.
      */
-    private static <T> AnimationUtil.BoxSpec[] baseSpecs(T[] arr, int left, int right, boolean[] sortedMask, boolean[] gapMask) {
-        AnimationUtil.BoxSpec[] specs = AnimationUtil.freshSpecs(arr);
+    private static <T> Animator.BoxSpec[] baseSpecs(T[] arr, int left, int right, boolean[] sortedMask, boolean[] gapMask) {
+        Animator.BoxSpec[] specs = Animator.freshSpecs(arr);
         for (int k = 0; k < arr.length; k++) {
             if (k < left || k > right) {
-                specs[k].state = AnimationUtil.CellState.OUT_OF_RANGE;
+                specs[k].state = Animator.CellState.OUT_OF_RANGE;
             } else if (sortedMask[k]) {
-                specs[k].state = AnimationUtil.CellState.SORTED;
+                specs[k].state = Animator.CellState.SORTED;
             }
             boolean boundaryGap = (k == left - 1) || (k == right);
             specs[k].gapAfter = boundaryGap || gapMask[k];
@@ -98,55 +98,55 @@ public class QuickSort {
 
     private static <T> void renderPartitionStart(T[] arr, int low, int high, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
         if (delayMs <= 0) return;
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        Animator.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
         String message = "Partitioning range [" + low + ".." + high + "]";
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 
     private static <T> void renderPivotChosen(T[] arr, int low, int high, int pivotIdx, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
         if (delayMs <= 0) return;
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
-        specs[pivotIdx].state = AnimationUtil.CellState.PIVOT;
+        Animator.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        specs[pivotIdx].state = Animator.CellState.PIVOT;
         specs[pivotIdx].lift = true;
         String message = "Selected pivot: " + arr[pivotIdx] + " at index " + pivotIdx;
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 
     private static <T> void renderCompare(T[] arr, int low, int high, int currentIdx, int pivotIdx, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
         if (delayMs <= 0) return;
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
-        specs[pivotIdx].state = AnimationUtil.CellState.PIVOT;
-        specs[currentIdx].state = AnimationUtil.CellState.COMPARING;
+        Animator.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        specs[pivotIdx].state = Animator.CellState.PIVOT;
+        specs[currentIdx].state = Animator.CellState.COMPARING;
         specs[currentIdx].lift = true;
         String message = "Comparing " + arr[currentIdx] + " (index " + currentIdx + ") with pivot " + arr[pivotIdx];
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 
     private static <T> void renderSwap(T[] arr, int low, int high, int idx1, int idx2, int pivotIdx, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
         if (delayMs <= 0) return;
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
-        specs[idx1].state = AnimationUtil.CellState.SWAPPING;
+        Animator.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        specs[idx1].state = Animator.CellState.SWAPPING;
         specs[idx1].lift = true;
-        specs[idx2].state = AnimationUtil.CellState.SWAPPING;
+        specs[idx2].state = Animator.CellState.SWAPPING;
         specs[idx2].lift = true;
         String message = "Swapped " + arr[idx1] + " (index " + idx1 + ") and " + arr[idx2] + " (index " + idx2 + ")";
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 
     private static <T> void renderPivotPlaced(T[] arr, int low, int high, int pivotIdx, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
         if (delayMs <= 0) return;
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
-        specs[pivotIdx].state = AnimationUtil.CellState.SORTED;
+        Animator.BoxSpec[] specs = baseSpecs(arr, low, high, sortedMask, gapMask);
+        specs[pivotIdx].state = Animator.CellState.SORTED;
         specs[pivotIdx].lift = true;
         String message = "Pivot " + arr[pivotIdx] + " locked in sorted position at index " + pivotIdx;
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 
     private static <T> void renderSingleElementSorted(T[] arr, int index, boolean[] sortedMask, boolean[] gapMask, int delayMs) {
         if (delayMs <= 0) return;
-        AnimationUtil.BoxSpec[] specs = baseSpecs(arr, index, index, sortedMask, gapMask);
-        specs[index].state = AnimationUtil.CellState.SORTED;
+        Animator.BoxSpec[] specs = baseSpecs(arr, index, index, sortedMask, gapMask);
+        specs[index].state = Animator.CellState.SORTED;
         String message = "Single element [" + index + "] is sorted";
-        AnimationUtil.render(arr, specs, message, delayMs);
+        Animator.render(arr, specs, message, delayMs);
     }
 }
