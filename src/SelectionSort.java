@@ -20,8 +20,8 @@ public class SelectionSort {
 
             // the unscanned tail is the active window; everything before i is already green
             try (var range = anim.range(i, n - 1)) {
-                anim.frame("Scanning [" + i + ".." + (n - 1) + "] for the "
-                        + (ascending ? "smallest" : "largest") + " remaining value");
+                anim.pivot(targetIndex, "Assuming " + arr[targetIndex] + " (index " + targetIndex + ") is the "
+                        + (ascending ? "smallest" : "largest") + " so far");
 
                 for (int j = i + 1; j < n; j++) { // scan remaining unsorted elements for a better candidate
                     anim.compare(j, targetIndex, "Comparing " + arr[j] + " (index " + j + ") with best so far "
@@ -32,6 +32,8 @@ public class SelectionSort {
 
                     if (better) {
                         targetIndex = j;
+                        anim.pivot(targetIndex, arr[targetIndex] + " (index " + targetIndex + ") is the new "
+                                + (ascending ? "smallest" : "largest") + " so far");
                     }
                 }
 
