@@ -21,11 +21,7 @@ public class Main {
                 run(readStrings(sc, count), algoChoice, ascending);
             }
 
-            System.out.print("\nSort again? [y/n]: ");
-            String again = readLine(sc);
-            if (!again.equalsIgnoreCase("y")) {
-                break;
-            }
+            if(!askRepeat(sc)) break;
         }
         sc.close();
     }
@@ -101,6 +97,16 @@ public class Main {
             values[filled++] = readLine(sc);
         }
         return values;
+    }
+
+    private static boolean askRepeat(Scanner sc) {
+        while (true) {
+            System.out.print("\nSort again? [y/n]: ");
+            String again = readLine(sc);
+            if (again.equalsIgnoreCase("y")) return true;
+            if (again.equalsIgnoreCase("n")) return false;
+            System.out.println("Please enter 'y' or 'n'.");
+        }
     }
 
     private static String readLine(Scanner sc) {
