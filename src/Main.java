@@ -8,18 +8,25 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        boolean ascending = menu(sc, "Sort order", "Ascending", "Descending") == 1;
-        int typeChoice = menu(sc, "Value type", "Numbers", "Strings");
-        int algoChoice = menu(sc, "Sorting algorithm",
-                "Selection Sort", "Insertion Sort", "Merge Sort", "Quick Sort");
-        int count = readCount(sc);
+        while(true) {
+            boolean ascending = menu(sc, "Sort order", "Ascending", "Descending") == 1;
+            int typeChoice = menu(sc, "Value type", "Numbers", "Strings");
+            int algoChoice = menu(sc, "Sorting algorithm",
+                    "Selection Sort", "Insertion Sort", "Merge Sort", "Quick Sort");
+            int count = readCount(sc);
 
-        if (typeChoice == 1) {
-            run(readIntegers(sc, count), algoChoice, ascending);
-        } else {
-            run(readStrings(sc, count), algoChoice, ascending);
+            if (typeChoice == 1) {
+                run(readIntegers(sc, count), algoChoice, ascending);
+            } else {
+                run(readStrings(sc, count), algoChoice, ascending);
+            }
+
+            System.out.print("\nSort again? [y/n]: ");
+            String again = readLine(sc);
+            if (!again.equalsIgnoreCase("y")) {
+                break;
+            }
         }
-
         sc.close();
     }
 
@@ -38,15 +45,15 @@ public class Main {
         System.out.println("\n\033[32mSorted result: " + Arrays.toString(arr) + "\033[0m");
     }
 
-    // ------------------------------------------------------------------- input
+    // --- INPUT HELPERS ---
 
     /** Prints a numbered menu and re-asks until one of its numbers comes back. */
     private static int menu(Scanner sc, String title, String... options) {
+        System.out.println("\n" + title + ":");
+        for (int i = 0; i < options.length; i++) {
+            System.out.println("  [" + (i + 1) + "]" + options[i]);
+        }
         while (true) {
-            System.out.println("\n" + title + ":");
-            for (int i = 0; i < options.length; i++) {
-                System.out.println("  [" + (i + 1) + "]" + options[i]);
-            }
             System.out.print("Choice [1-" + options.length + "]: ");
 
             Integer choice = parseInt(readLine(sc));
@@ -97,7 +104,7 @@ public class Main {
     }
 
     private static String readLine(Scanner sc) {
-        return sc.hasNextLine() ? sc.nextLine().trim() : "";
+        return sc.nextLine().trim();
     }
 
     /** Parses a whole number, or returns null rather than throwing. */

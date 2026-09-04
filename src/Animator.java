@@ -23,7 +23,7 @@ import java.util.List;
  */
 public final class Animator<T> {
 
-    // ------------------------------------------------------------------ palette
+    // ---PALETTE---
 
     private static final String CLEAR   = "\033[H\033[2J"; // home the cursor, wipe the screen
     private static final String RESET   = "\033[0m";
@@ -47,7 +47,7 @@ public final class Animator<T> {
         boolean gapAfter;  // widen the whitespace after this box
     }
 
-    // -------------------------------------------------------------------- state
+    // ---STATE---
 
     private final T[] arr;
     private final int delayMs;
@@ -58,14 +58,14 @@ public final class Animator<T> {
 
     private int low;                     // active window, inclusive
     private int high;
-    private int pivot = -1;              // sticky pivot inside the active window, -1 = none
+    private int pivot = -1;              // represents pivot inside the active window, -1 = none currently held
 
     public Animator(T[] arr, int delayMs) {
         this.arr = arr;
         this.delayMs = delayMs;
-        this.drawing = delayMs > 0;
-        this.sorted = new boolean[arr.length];
-        this.gap = new boolean[arr.length];
+        this.drawing = delayMs > 0; // if delayMs is 0, we are in silent mode and don't draw anything
+        this.sorted = new boolean[arr.length]; // all false at first, then true for each index that is finished
+        this.gap = new boolean[arr.length]; // all false at first, then true for each index that has a split after it
         this.low = 0;
         this.high = arr.length - 1;
     }
@@ -75,7 +75,7 @@ public final class Animator<T> {
         return new Animator<>(arr, 0);
     }
 
-    // ------------------------------------------------------------ active window
+    // ---ACTIVE WINDOW---
 
     /**
      * Narrows the active window for the duration of a try-with-resources block,
@@ -107,7 +107,7 @@ public final class Animator<T> {
         }
     }
 
-    // ------------------------------------------------- sticky state, no frame
+    // ---STICKY STATE, NO FRAME---
 
     /** Index i is finished; it stays green in every later frame. */
     public void markSorted(int i) {
