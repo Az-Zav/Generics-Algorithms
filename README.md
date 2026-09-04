@@ -13,9 +13,8 @@ java -cp out Main
 ```
 
 `Main` asks four questions on stdin — sort order, value type, algorithm, and how
-many values — then reads the values themselves (space- or line-separated, so
-either `5 2 8 1 9` or one per line works). It animates the sort, prints the full
-step log, and prints the sorted result.
+many values — then reads one value per line. It animates the sort, prints the
+full step log, and prints the sorted result.
 
 ## Algorithms
 

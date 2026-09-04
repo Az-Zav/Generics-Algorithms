@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class Main {
     //test
-    private static final int DELAY_MS = 500; // pace of the animation, single source of truth
+    private static final int DELAY_MS = 2500; // pace of the animation, single source of truth
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -45,7 +45,7 @@ public class Main {
         while (true) {
             System.out.println("\n" + title + ":");
             for (int i = 0; i < options.length; i++) {
-                System.out.println("  " + (i + 1) + ") " + options[i]);
+                System.out.println("  [" + (i + 1) + "]" + options[i]);
             }
             System.out.print("Choice [1-" + options.length + "]: ");
 
@@ -72,16 +72,14 @@ public class Main {
         Integer[] values = new Integer[count];
         int filled = 0;
 
-        System.out.println("\nEnter " + count + " integers (space- or line-separated):");
+        System.out.println("\nEnter " + count + " integers, one per line:");
         while (filled < count) {
-            for (String token : nextTokens(sc)) {
-                if (filled == count) break;
-                Integer value = parseInt(token);
-                if (value == null) {
-                    System.out.println("  '" + token + "' is not an integer -- skipped");
-                } else {
-                    values[filled++] = value;
-                }
+            String line = readLine(sc);
+            Integer value = parseInt(line);
+            if (value == null) {
+                System.out.println("  '" + line + "' is not an integer -- skipped");
+            } else {
+                values[filled++] = value;
             }
         }
         return values;
@@ -91,23 +89,11 @@ public class Main {
         String[] values = new String[count];
         int filled = 0;
 
-        System.out.println("\nEnter " + count + " strings (space- or line-separated):");
+        System.out.println("\nEnter " + count + " strings, one per line:");
         while (filled < count) {
-            for (String token : nextTokens(sc)) {
-                if (filled == count) break;
-                values[filled++] = token;
-            }
+            values[filled++] = readLine(sc);
         }
         return values;
-    }
-
-    /** Next non-blank line, split into whitespace-separated tokens. */
-    private static String[] nextTokens(Scanner sc) {
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine().trim();
-            if (!line.isEmpty()) return line.split("\\s+");
-        }
-        throw new IllegalStateException("Input ended before enough values were entered");
     }
 
     private static String readLine(Scanner sc) {
