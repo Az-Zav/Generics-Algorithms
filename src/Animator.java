@@ -119,7 +119,7 @@ public final class Animator<T> {
         Arrays.fill(sorted, 0, end + 1, true);
     }
 
-    // ---------------------------------------------------------------- the verbs
+    // ---VERBS---
 
     /** The current picture with no cell singled out. */
     public void frame(String message) {
@@ -181,7 +181,7 @@ public final class Animator<T> {
         frame(message);
     }
 
-    // ----------------------------------------------------------- splits & joins
+    // ---SPLIT & JOIN---
 
     /** Opens a visual gap after index mid; it stays open until join() heals it. */
     public void split(int mid, String message) {
@@ -195,7 +195,7 @@ public final class Animator<T> {
         frame(message);
     }
 
-    // ------------------------------------------------------------- the step log
+    // ---STEP LOG---
 
     public void printSummary() {
         System.out.println("\n=== Algorithm steps (" + steps.size() + ") ===");
@@ -286,12 +286,14 @@ public final class Animator<T> {
         return CLEAR + lift + "\n" + top + "\n" + mid + "\n" + bot + "\n" + idx + "\n" + message + "\n";
     }
 
+    /** Centers text in a box of given width, padding with spaces. */
     private static String center(String text, int width) {
         int pad = Math.max(0, width - text.length());
         int left = pad / 2;
         return " ".repeat(left) + text + " ".repeat(pad - left);
     }
 
+    /** Clears the screen. */
     private static void clearScreen() {
         try {
             if (System.getProperty("os.name").toLowerCase().contains("win")) {
@@ -305,6 +307,7 @@ public final class Animator<T> {
         }
     }
 
+    /** Returns the color code for a given cell state. */
     private static String colorFor(CellState state) {
         return switch (state) {
             case COMPARING    -> YELLOW;
