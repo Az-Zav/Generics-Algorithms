@@ -255,7 +255,7 @@ public final class Animator<T> {
 
     /** Builds the whole frame -- five rows of box art plus the status line. */
     private String compose(BoxSpec[] specs, String message) {
-        //clearScreen();
+        clearScreen();
         int width = 1;
         for (T value : arr) {
             width = Math.max(width, String.valueOf(value).length());
